@@ -24,6 +24,15 @@ fun twoSum(nums: IntArray, target: Int): IntArray {
     return intArrayOf()
 }
 
+/**
+ * Optimized way
+ * Time  : O(n)
+ * Space : O(n)
+ *
+ * Why O(n)?
+ * We traverse the array once.
+ * HashMap lookup is O(1) average.
+ */
 fun twoSumOptimized(nums: IntArray, target: Int): IntArray {
 
     // Stores:
