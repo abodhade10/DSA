@@ -1,47 +1,67 @@
+package blind75.string
+
 fun main() {
-    val solution = LongestSubstringWithoutRepeatingCharacters()
 
-    val testCases = listOf(
-        "" to 0,
-        "abcabcbb" to 3,
-        "bbbbb" to 1,
-        "pwwkew" to 3,
-        "abcdef" to 6,
-        "abba" to 2
-    )
-
-    for ((input, expected) in testCases) {
-        val actual = lengthOfLongestSubstring(input)
-
-        println("Input: \"$input\"")
-        println("Expected: $expected")
-        println("Actual: $actual")
-        println("Test Result: ${if (actual == expected) "PASS" else "FAIL"}")
-        println()
-    }
+    println(lengthOfLongestSubstringBruteForce("abcabcbb")) // 3
+    println(lengthOfLongestSubstringOptimize("abcabcbb"))  // 3
 }
 
-fun lengthOfLongestSubstring(s: String): Int {
-    val seen = mutableSetOf<Char>()
-    var left = 0
+/**
+ * Brute Force
+ * Time  : O(n³)
+ * Space : O(min(n, k))
+ *
+ * Why O(n³)?
+ * There are O(n²) possible substrings, and checking
+ * each substring for duplicate characters takes O(n).
+ */
+fun lengthOfLongestSubstringBruteForce(s: String): Int {
     var maxLength = 0
 
-    for (right in s.indices) {
+    for (i in s.indices) {
+        for (j in i until s.length) {
+            val seen = HashSet<Char>()
+            var isUnique = true
 
-        // Remove characters until the duplicate is gone
-        while (s[right] in seen) {
-            seen.remove(s[left])
-            left++
+            for (k in i..j) {
+                if (!seen.add(s[k])) {
+                    isUnique = false
+                    break
+                }
+            }
+
+            if (isUnique) {
+                maxLength = maxOf(maxLength, j - i + 1)
+            }
         }
-
-        // Add current character to the window
-        seen.add(s[right])
-
-        // Update the maximum window length
-        val currentLength = right - left + 1
-        maxLength = maxOf(maxLength, currentLength)
     }
 
     return maxLength
 }
 
+/**
+ * Optimized - Sliding Window
+ * Time  : O(n)
+ * Space : O(min(n, k))
+ *
+ * Why O(n)?
+ * Each character is added to and removed from the
+ * HashSet at most once.
+ */
+fun lengthOfLongestSubstringOptimize(s: String): Int {
+    val seen = HashSet<Char>()
+    var left = 0
+    var maxLength = 0
+
+    for (right in s.indices) {
+        while (seen.contains(s[right])) {
+            seen.remove(s[left])
+            left++
+        }
+
+        seen.add(s[right])
+        maxLength = maxOf(maxLength, right - left + 1)
+    }
+
+    return maxLength
+}

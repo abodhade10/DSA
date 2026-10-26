@@ -1,145 +1,218 @@
-# LeetCode 3: Longest Substring Without Repeating Characters
+# 01. Longest Substring Without Repeating Characters
 
-- **Problem:** [LeetCode 3](https://leetcode.com/problems/longest-substring-without-repeating-characters/)
-- **Pattern:** Sliding Window + HashSet
+-
+**LeetCode:** [3. Longest Substring Without Repeating Characters](https://leetcode.com/problems/longest-substring-without-repeating-characters/)
+- **Pattern:** Sliding Window
 - **Difficulty:** Medium
-- **Class Name:** `LongestSubstringWithoutRepeatingCharacters`
-- **Code File:** `LongestSubstringWithoutRepeatingCharacters.kt`
+- **Class/Program:** `LongestSubstringWithoutRepeatingCharacters.kt`
 
-## 1. Problem Statement
+## Problem
 
 Given a string `s`, find the length of the longest substring without repeating characters.
 
-A substring is a contiguous sequence of characters.
-
 ### Examples
 
-| Input        | Output | Explanation               |
-|--------------|-------:|---------------------------|
-| `"abcabcbb"` |      3 | `"abc"`                   |
-| `"bbbbb"`    |      1 | `"b"`                     |
-| `"pwwkew"`   |      3 | `"wke"`                   |
-| `""`         |      0 | Empty string              |
-| `"abcdef"`   |      6 | All characters are unique |
-| `"abba"`     |      2 | `"ab"` or `"ba"`          |
+| Input        | Output |
+|--------------|-------:|
+| `"abcabcbb"` |      3 |
+| `"bbbbb"`    |      1 |
+| `"pwwkew"`   |      3 |
+| `""`         |      0 |
+| `"abba"`     |      2 |
 
-## 2. Pattern: Sliding Window
+## 1. Brute Force
 
-Use two pointers, `left` and `right`, to maintain a window containing unique characters.
+### Approach
 
-1. Move the `right` pointer through the string.
-2. Use a `HashSet` to track characters in the current window.
-3. If a duplicate appears, remove characters from the left until the duplicate is removed.
-4. Add the current character to the set.
-5. Update the maximum window length.
+- Generate every possible substring.
+- Use a `HashSet` to check whether each substring contains duplicate characters.
+- If all characters are unique, update the maximum length.
 
-## 3. Kotlin Solution
+### Code
+
+```kotlin
+fun lengthOfLongestSubstringBruteForce(s: String): Int {
+    var maxLength = 0
+
+    for (i in s.indices) {
+        for (j in i until s.length) {
+            val seen = HashSet<Char>()
+            var isUnique = true
+
+            for (k in i..j) {
+                if (!seen.add(s[k])) {
+                    isUnique = false
+                    break
+                }
+            }
+
+            if (isUnique) {
+                maxLength = maxOf(maxLength, j - i + 1)
+            }
+        }
+    }
+
+    return maxLength
+}
+```
+
+### Complexity
+
+- **Time:** `O(n³)`
+- **Space:** `O(min(n, k))`
+
+### Why O (n³)?
+
+There are `O(n²)` possible substrings. Checking each substring can take up to `O(n)` time.
+
+## 2. Optimized Approach — Sliding Window
+
+### Approach
+
+- Maintain a window using two pointers: `left` and `right`.
+- Use a `HashSet` to track characters in the current window.
+- If a duplicate is found, remove characters from the left until the duplicate is gone.
+- Update the maximum window length after adding each character.
+
+### Code
+
+```kotlin
+fun lengthOfLongestSubstringOptimize(s: String): Int {
+    val seen = HashSet<Char>()
+    var left = 0
+    var maxLength = 0
+
+    for (right in s.indices) {
+        while (seen.contains(s[right])) {
+            seen.remove(s[left])
+            left++
+        }
+
+        seen.add(s[right])
+
+        maxLength = maxOf(
+            maxLength,
+            right - left + 1
+        )
+    }
+
+    return maxLength
+}
+```
+
+### Complexity
+
+- **Time:** `O(n)`
+- **Space:** `O(min(n, k))`
+
+### Why O (n)?
+
+Each character enters the set once and leaves the set at most once. Therefore, both pointers move forward at most `n`
+times.
+
+## 3. Complete Kotlin Program
 
 **File:** `LongestSubstringWithoutRepeatingCharacters.kt`
 
 ```kotlin
-class LongestSubstringWithoutRepeatingCharacters {
-
-    fun lengthOfLongestSubstring(s: String): Int {
-        val seen = mutableSetOf<Char>()
-        var left = 0
-        var maxLength = 0
-
-        for (right in s.indices) {
-
-            // Remove characters until the duplicate is gone
-            while (s[right] in seen) {
-                seen.remove(s[left])
-                left++
-            }
-
-            // Add the current character
-            seen.add(s[right])
-
-            // Calculate the current window length
-            val currentLength = right - left + 1
-
-            // Update the maximum length
-            maxLength = maxOf(maxLength, currentLength)
-        }
-
-        return maxLength
-    }
-}
+package blind75.string
 
 fun main() {
-    val solution = LongestSubstringWithoutRepeatingCharacters()
+    println(lengthOfLongestSubstringBruteForce("abcabcbb")) // 3
+    println(lengthOfLongestSubstringOptimize("abcabcbb"))  // 3
+}
 
-    val testCases = listOf(
-        "" to 0,
-        "abcabcbb" to 3,
-        "bbbbb" to 1,
-        "pwwkew" to 3,
-        "abcdef" to 6,
-        "abba" to 2
-    )
+/**
+ * Brute Force
+ * Time  : O(n³)
+ * Space : O(min(n, k))
+ */
+fun lengthOfLongestSubstringBruteForce(s: String): Int {
+    var maxLength = 0
 
-    for ((input, expected) in testCases) {
-        val actual = solution.lengthOfLongestSubstring(input)
+    for (i in s.indices) {
+        for (j in i until s.length) {
+            val seen = HashSet<Char>()
+            var isUnique = true
 
-        println("Input: \"$input\"")
-        println("Expected: $expected")
-        println("Actual: $actual")
-        println(
-            "Test Result: ${
-                if (actual == expected) "PASS" else "FAIL"
-            }"
-        )
-        println()
+            for (k in i..j) {
+                if (!seen.add(s[k])) {
+                    isUnique = false
+                    break
+                }
+            }
+
+            if (isUnique) {
+                maxLength = maxOf(maxLength, j - i + 1)
+            }
+        }
     }
+
+    return maxLength
+}
+
+/**
+ * Optimized - Sliding Window
+ * Time  : O(n)
+ * Space : O(min(n, k))
+ */
+fun lengthOfLongestSubstringOptimize(s: String): Int {
+    val seen = HashSet<Char>()
+    var left = 0
+    var maxLength = 0
+
+    for (right in s.indices) {
+        while (seen.contains(s[right])) {
+            seen.remove(s[left])
+            left++
+        }
+
+        seen.add(s[right])
+        maxLength = maxOf(maxLength, right - left + 1)
+    }
+
+    return maxLength
 }
 ```
 
-## 4. Dry Run
+## 4. Test Cases
 
-**Input:** `s = "abcabcbb"`
+| Input        | Expected | Brute Force | Optimized |
+|--------------|---------:|------------:|----------:|
+| `""`         |        0 |           0 |         0 |
+| `"abcabcbb"` |        3 |           3 |         3 |
+| `"bbbbb"`    |        1 |           1 |         1 |
+| `"pwwkew"`   |        3 |           3 |         3 |
+| `"abcdef"`   |        6 |           6 |         6 |
+| `"abba"`     |        2 |           2 |         2 |
 
-| Right | Character | Window  | Max Length |
-|------:|:---------:|---------|-----------:|
-|     0 |     a     | `"a"`   |          1 |
-|     1 |     b     | `"ab"`  |          2 |
-|     2 |     c     | `"abc"` |          3 |
-|     3 |     a     | `"bca"` |          3 |
-|     4 |     b     | `"cab"` |          3 |
-|     5 |     c     | `"abc"` |          3 |
-|     6 |     b     | `"cb"`  |          3 |
-|     7 |     b     | `"b"`   |          3 |
+## 5. Dry Run
 
-**Final Output:** `3`
+**Input:** `"abcabcbb"`
 
-## 5. Test Results
+| Right | Character | Current Window | Max Length |
+|------:|:---------:|----------------|-----------:|
+|     0 |     a     | `a`            |          1 |
+|     1 |     b     | `ab`           |          2 |
+|     2 |     c     | `abc`          |          3 |
+|     3 |     a     | `bca`          |          3 |
+|     4 |     b     | `cab`          |          3 |
+|     5 |     c     | `abc`          |          3 |
+|     6 |     b     | `cb`           |          3 |
+|     7 |     b     | `b`            |          3 |
 
-| Test Case    | Expected | Actual | Result |
-|--------------|---------:|-------:|--------|
-| `""`         |        0 |      0 | PASS   |
-| `"abcabcbb"` |        3 |      3 | PASS   |
-| `"bbbbb"`    |        1 |      1 | PASS   |
-| `"pwwkew"`   |        3 |      3 | PASS   |
-| `"abcdef"`   |        6 |      6 | PASS   |
-| `"abba"`     |        2 |      2 | PASS   |
+**Output:** `3`
 
-## 6. Complexity Analysis
+## 6. Interview Explanation
 
-- **Time Complexity:** `O(n)`  
-  Each character is added to and removed from the set at most once.
+"I can solve this using brute force by generating every substring and checking whether its characters are unique, but
+that takes O (n³) time.
 
-- **Space Complexity:** `O(min(n, k))`  
-  The set stores only the characters in the current window, where `k` is the size of the character set.
+To optimize it, I use a sliding window with a HashSet. When a duplicate appears, I move the left pointer and remove
+characters until the window becomes unique again. This reduces the time complexity to O (n)."
 
-## 7. Interview Explanation
+## Key Takeaway
 
-"I use a sliding window and a set to keep track of unique characters. The right pointer expands the window. When a
-duplicate appears, I move the left pointer forward and remove characters until the duplicate is gone. I update the
-maximum window length at every step. Since each character enters and leaves the set at most once, the time complexity is
-O (n)."
-
-## 8. Key Takeaway
-
-Use the **Sliding Window** pattern when you need to find a longest or shortest substring that satisfies a condition.
-
-Use a **HashSet** when you need to track unique characters efficiently.
+- **Brute force:** Generate and validate all substrings.
+- **Optimized:** Sliding Window + HashSet.
+- **Main lesson:** Avoid rechecking every substring when you can maintain a valid window.
